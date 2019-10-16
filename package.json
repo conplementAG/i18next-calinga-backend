@@ -1,0 +1,35 @@
+{
+  "name": "i18next-calinga-backend",
+  "version": "0.0.2",
+  "keywords": [
+    "i18next",
+    "i18next-backend",
+    "calinga"
+  ],
+  "homepage": "https://github.com/conplementAG/i18next-calinga-backend",
+  "bugs": "https://github.com/conplementAG/i18next-calinga-backend/issues",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/conplementAG/i18next-calinga-backend.git"
+  },
+  "author": "Calinga Team <calinga@conplement.de>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -cw"
+  },
+  "dependencies": {
+    "i18next": "^17.2.0"
+  },
+  "devDependencies": {
+    "rollup": "^1.24.0",
+    "rollup-plugin-typescript2": "^0.24.3",
+    "typescript": "^3.6.4"
+  }
+}
