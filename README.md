@@ -42,4 +42,4 @@ i18n
 
 ```
 
-For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo)
+For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
