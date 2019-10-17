@@ -21,11 +21,11 @@ export interface CalingaBackendOptions {
   /**
    * The version of the Calinga project
    */
-  version: string;
+  version?: string;
   /**
    * The base URL of the Calinga service. Should not be changed.
    */
-  serviceBaseUrl: string;
+  serviceBaseUrl?: string;
   /**
    * A cache to store locales that were returned from the Calinga service
    */
