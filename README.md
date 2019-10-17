@@ -10,7 +10,7 @@ An i18next backend to connect to the Calinga service.
 Installation:
 
 ```
-npm install i18next-locize-backend
+npm install i18next-calinga-backend
 ```
 
 Usage:
