@@ -1,4 +1,5 @@
 import { BackendModule, Services, ReadCallback, Resource, InitOptions } from "i18next";
+import md5 from "md5";
 
 export interface Cache {
   /**
@@ -58,7 +59,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
   }
 
-  public read(language: string, namespace: string, callback: ReadCallback) {
+  public async read(language: string, namespace: string, callback: ReadCallback) {
     const url = this.services.interpolator.interpolate(
       this.options.serviceBaseUrl + this.loadPath,
       {
@@ -70,26 +71,28 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
       {}
     );
 
-    this.ajax(url, this.options, (data, xhr) => {
-      if (xhr.status >= 500 && xhr.status < 600) {
-        return callback(new Error(`failed loading ${url}`), {}); //{} means retry
+    let cachedData;
+    let checkSum;
+
+    if (this.options.cache) {
+      cachedData = await this.options.cache.read(this.buildKey(namespace, language));
+
+      if (cachedData) {
+        checkSum = md5(cachedData);
       }
+    }
 
+    this.ajax(url, checkSum, (data, xhr) => {
       if (xhr.status !== 200) {
-        if (this.options.cache) {
-          this.options.cache
-            .read(this.buildKey(namespace, language))
-            .then(cachedData => {
-              if (cachedData) {
-                return callback(null, JSON.parse(cachedData));
-              }
-              if (this.options.resources) {
-                return callback(null, this.options.resources[language][namespace]);
-              }
-
-              return callback(new Error('No fallback resources provided.'), null);
-            });
+        if (cachedData) {
+            return callback(null, JSON.parse(cachedData));
         }
+        if (this.options.resources) {
+          return callback(null, this.options.resources[language][namespace]);
+        }
+
+        return callback(new Error('No fallback resources provided.'), null);
+
       } else {
 
         let ret;
@@ -116,18 +119,12 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     }
   }
 
-  private ajax(url, options, callback, data?) {
+  private ajax(url, checkSum, callback, data?) {
     try {
       const x = new (XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
       x.open(data ? 'POST' : 'GET', url, 1);
-      if (!options.crossDomain) {
-        x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-      }
-      if (options.authorize && options.apiKey) {
-        x.setRequestHeader('Authorization', options.apiKey);
-      }
-      if (data || options.setContentTypeJSON) {
-        x.setRequestHeader('Content-type', 'application/json');
+      if (checkSum) {
+        x.setRequestHeader('If-None-Match', `"${checkSum}"`);
       }
       x.onreadystatechange = () => {
         if (x.readyState > 3 && callback) {
