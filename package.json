@@ -25,7 +25,8 @@
     "watch": "rollup -cw"
   },
   "dependencies": {
-    "i18next": "^17.2.0"
+    "i18next": "^17.2.0",
+    "md5": "^2.2.1"
   },
   "devDependencies": {
     "rollup": "^1.24.0",
