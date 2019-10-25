@@ -71,33 +71,29 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
       {}
     );
 
-    let cachedData;
+    let data;
     let checkSum;
 
+    if (this.options.resources) {
+      data = this.options.resources[language][namespace];
+    }
+
     if (this.options.cache) {
-      cachedData = await this.options.cache.read(this.buildKey(namespace, language));
+      const cachedData = await this.options.cache.read(this.buildKey(namespace, language));
 
       if (cachedData) {
         checkSum = md5(cachedData);
+        data = { ...data, ...JSON.parse(cachedData) };
       }
     }
 
-    this.ajax(url, checkSum, (data, xhr) => {
+    this.ajax(url, checkSum, (result, xhr) => {
       if (xhr.status !== 200) {
-        if (cachedData) {
-            return callback(null, JSON.parse(cachedData));
-        }
-        if (this.options.resources) {
-          return callback(null, this.options.resources[language][namespace]);
-        }
-
-        return callback(new Error('No fallback resources provided.'), null);
-
+        return callback(null, data);
       } else {
 
-        let ret;
         try {
-          ret = JSON.parse(data);
+          data = { ...data, ...JSON.parse(result)};
         }
         catch (e) {
           return callback(new Error(`failed parsing ${url} to json`), null);
@@ -105,8 +101,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
         if (this.options.cache) {
           this.options.cache
-            .write(this.buildKey(namespace, language), JSON.stringify(ret))
-            .then(() => callback(null, ret));
+            .write(this.buildKey(namespace, language), result)
+            .then(() => callback(null, data));
         }
       }
     });
