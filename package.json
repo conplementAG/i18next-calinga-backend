@@ -25,6 +25,7 @@
     "watch": "rollup -cw"
   },
   "dependencies": {
+    "axios": "^0.19.0",
     "i18next": "^17.2.0",
     "md5": "^2.2.1"
   },
