@@ -1,5 +1,6 @@
 import { BackendModule, Services, ReadCallback, Resource, InitOptions } from "i18next";
 import md5 from "md5";
+import axios from "axios";
 
 export interface Cache {
   /**
@@ -87,52 +88,27 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
       }
     }
 
-    this.ajax(url, checkSum, (result, xhr) => {
-      if (xhr.status !== 200) {
+    try {
+      const response = await axios.get(url, { headers: { "If-None-Match": checkSum } });
+      if (response.status !== 200) {
         return callback(null, data);
       } else {
-
-        try {
-          data = { ...data, ...JSON.parse(result)};
-        }
-        catch (e) {
-          return callback(new Error(`failed parsing ${url} to json`), null);
-        }
-
+        data = { ...data, ...response.data};
         if (this.options.cache) {
           this.options.cache
-            .write(this.buildKey(namespace, language), result)
+            .write(this.buildKey(namespace, language), JSON.stringify(response.data))
             .then(() => callback(null, data));
         }
       }
-    });
+    } catch (error) {
+      callback(error, null);
+    }
   }
 
   private getDefaultOptions(): CalingaBackendOptions {
     return {
       serviceBaseUrl: 'https://prod.cali.conplement.cloud/api/v1/',
       version: 'v1'
-    }
-  }
-
-  private ajax(url, checkSum, callback, data?) {
-    try {
-      const x = new (XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-      x.open(data ? 'POST' : 'GET', url, 1);
-      if (checkSum) {
-        x.setRequestHeader('If-None-Match', `"${checkSum}"`);
-      }
-      x.onreadystatechange = () => {
-        if (x.readyState > 3 && callback) {
-          callback(x.responseText, x);
-        }
-      };
-      x.send(JSON.stringify(data));
-    }
-    catch (e) {
-      if (window.console) {
-        console.log(e);
-      }
     }
   }
 
