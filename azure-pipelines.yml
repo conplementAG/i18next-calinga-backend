@@ -12,6 +12,15 @@ jobs:
           yarn run build
         displayName: 'yarn install and build'
 
+  - job: Test
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - script: |
+          yarn install
+          yarn run test
+        displayName: 'run tests'
+
   - job: Publish
     dependsOn: CI
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
