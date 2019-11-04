@@ -73,7 +73,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     );
 
     let data;
-    let checkSum;
+    let checkSum = "";
 
     if (this.options.resources) {
       data = this.options.resources[language][namespace];
@@ -98,6 +98,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
           this.options.cache
             .write(this.buildKey(namespace, language), JSON.stringify(response.data))
             .then(() => callback(null, data));
+        } else {
+          callback(null, data);
         }
       }
     } catch (error) {
