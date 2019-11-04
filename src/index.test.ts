@@ -3,6 +3,14 @@ import { CalingaBackend, CalingaBackendOptions } from "./";
 import axios from "axios";
 import { mocked } from 'ts-jest/utils'
 
+const keyName = "origin";
+const language = "en";
+const namespace = "default";
+
+const fromResourcesTranslation = "from resources";
+const fromCacheTranslation = "from cache";
+const fromServiceTranslation = "from service";
+
 jest.mock("axios");
 const axiosMock = mocked(axios, true);
 i18next.init();
@@ -20,7 +28,7 @@ describe("read", () => {
           setupService(false);
           const backend = new CalingaBackend(i18next.services, options);
 
-          backend.read("en", "default", (error, data) => {
+          backend.read(language, namespace, (error, data) => {
             expect(data).toBeUndefined();
             done();
           });
@@ -33,9 +41,9 @@ describe("read", () => {
           setupResources();
           const backend = new CalingaBackend(i18next.services, options);
 
-          backend.read("en", "default", (error, data) => {
+          backend.read(language, namespace, (error, data) => {
             expect(data).toBeDefined();
-            expect(data["origin"]).toBe("from resources");
+            expect(data[keyName]).toBe(fromResourcesTranslation);
             done();
           });
         })
@@ -49,9 +57,9 @@ describe("read", () => {
         setupCache();
         const backend = new CalingaBackend(i18next.services, options);
 
-        backend.read("en", "default", (error, data) => {
+        backend.read(language, namespace, (error, data) => {
           expect(data).toBeDefined();
-          expect(data["origin"]).toBe("from cache");
+          expect(data[keyName]).toBe(fromCacheTranslation);
           done();
         });
       })
@@ -65,9 +73,9 @@ describe("read", () => {
       setupResources();
       const backend = new CalingaBackend(i18next.services, options);
 
-      backend.read("en", "default", (error, data) => {
+      backend.read(language, namespace, (error, data) => {
         expect(data).toBeDefined();
-        expect(data["origin"]).toBe("from service");
+        expect(data[keyName]).toBe(fromServiceTranslation);
         done();
       });
     })
@@ -79,9 +87,9 @@ describe("read", () => {
         setupResources();
         const backend = new CalingaBackend(i18next.services, options);
 
-        backend.read("en", "default", async (error, data) => {
+        backend.read(language, namespace, async (error, data) => {
           const cachedData = await options.cache.read("calinga_translations_default_en")
-          expect(JSON.parse(cachedData)["origin"]).toBe("from service");
+          expect(JSON.parse(cachedData)[keyName]).toBe(fromServiceTranslation);
           done();
         });
       })
@@ -91,9 +99,9 @@ describe("read", () => {
 
 function setupResources() {
   options.resources = {
-    "en": {
-      "default": {
-        "origin": "from resources"
+    [language]: {
+      [namespace]: {
+        [keyName]: fromResourcesTranslation
       }
     }
   };
@@ -101,7 +109,7 @@ function setupResources() {
 
 function setupCache() {
   const locale = {
-    "origin": "from cache"
+    [keyName]: fromCacheTranslation
   };
   const cache = {
     calinga_translations_default_en: JSON.stringify(locale)
@@ -119,7 +127,7 @@ function setupCache() {
 
 function setupService(available: boolean) {
   if (available) {
-    axiosMock.get.mockReturnValue(Promise.resolve({ status: 200, data: {"origin": "from service"}}));
+    axiosMock.get.mockReturnValue(Promise.resolve({ status: 200, data: {[keyName]: fromServiceTranslation }}));
   } else {
     axiosMock.get.mockReturnValue(Promise.resolve({ status: 404 }));
   }
