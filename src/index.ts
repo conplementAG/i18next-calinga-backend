@@ -109,7 +109,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
   private getDefaultOptions(): CalingaBackendOptions {
     return {
-      serviceBaseUrl: 'https://prod.cali.conplement.cloud/api/v1/',
+      serviceBaseUrl: 'https://api.calinga.io/v1/',
       version: 'v1'
     }
   }
