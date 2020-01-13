@@ -106,7 +106,6 @@ describe("read", () => {
         backend.read(language, namespace, async (error, data) => {
           const cachedData = await options.cache.read("calinga_translations_default_en")
           expect(JSON.parse(cachedData)[keyName]).toBe(fromCacheTranslation);
-          done();
         });
       })
     })
