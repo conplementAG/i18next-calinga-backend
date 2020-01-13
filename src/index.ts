@@ -88,22 +88,22 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
       }
     }
 
+    callback(null, data);
+
+    const backendConnector = this.services.backendConnector;
     try {
       const response = await axios.get(url, { headers: { "If-None-Match": checkSum } });
-      if (response.status !== 200) {
-        return callback(null, data);
-      } else {
+      if (response.status === 200) {
         data = { ...data, ...response.data};
         if (this.options.cache) {
           this.options.cache
             .write(this.buildKey(namespace, language), JSON.stringify(response.data))
-            .then(() => callback(null, data));
+            .then(() => backendConnector.loaded(`${language}|${namespace}`, null, data));
         } else {
-          callback(null, data);
+          backendConnector.loaded(`${language}|${namespace}`, null, data);
         }
       }
     } catch (error) {
-      callback(error, null);
     }
   }
 
