@@ -42,4 +42,12 @@ i18n
 
 ```
 
+For use in React or React Native also add the following lines to the init options:
+
+```ts
+react: {
+  bindI18n: 'loaded'
+}
+```
+
 For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
