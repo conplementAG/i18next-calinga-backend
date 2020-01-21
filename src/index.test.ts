@@ -29,11 +29,7 @@ describe('read', () => {
             describe('no resources provided', () => {
                 it('should return nothing', done => {
                     setupService(false);
-                    const backend = new CalingaBackend(
-                        { ...i18next.services, backendConnector: backendConnectorMock },
-                        options,
-                        {}
-                    );
+                    const backend = new CalingaBackend(i18next.services, options, {});
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeUndefined();
@@ -79,15 +75,19 @@ describe('read', () => {
             setupService(true);
             setupCache();
             setupResources();
-            const backend = new CalingaBackend(i18next.services, options, {});
 
-            backend.services.backendConnector.on('loaded', (data, error) => {
-                // expect(data).toBe(fromServiceTranslation);
-                console.log('data');
-                console.log(error);
-            });
+            const backendConnectorMock = {
+                loaded: (name, err, data) => {
+                    expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
+                    done();
+                }
+            };
 
-            // todo extend test to expect loaded event
+            const backend = new CalingaBackend(
+                { ...i18next.services, backendConnector: backendConnectorMock },
+                options,
+                {}
+            );
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
@@ -101,9 +101,18 @@ describe('read', () => {
                 setupService(true);
                 setupCache();
                 setupResources();
-                const backend = new CalingaBackend(i18next.services, options, {});
+                const backendConnectorMock = {
+                    loaded: (name, err, data) => {
+                        expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
+                        done();
+                    }
+                };
 
-                // todo extend test to expect loaded event
+                const backend = new CalingaBackend(
+                    { ...i18next.services, backendConnector: backendConnectorMock },
+                    options,
+                    {}
+                );
 
                 backend.read(language, namespace, async (error, data) => {
                     const cachedData = await options.cache.read('calinga_translations_default_en');
@@ -118,7 +127,7 @@ describe('read', () => {
 describe('init', () => {
     describe('devmode enabled', () => {
         it('adds cimode to the languages', done => {
-            setupService(false);
+            setupService(true);
             CalingaBackend.onLanguagesChanged = l => {
                 expect(CalingaBackend.languages).toContain('cimode');
                 expect(CalingaBackend.languages).toContain('en');
