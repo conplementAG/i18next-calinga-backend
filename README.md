@@ -22,6 +22,7 @@ import { CalingaBackend, CalingaBackendOptions } from 'i18next-calinga-backend';
 ...
 
 const backendOptions: CalingaBackendOptions = {
+    project: '<YOUR_PROJECT_NAME_HERE>'
     version: 'v1',
     resources: {
         en: {
