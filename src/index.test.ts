@@ -15,7 +15,6 @@ jest.mock('axios');
 const axiosMock = mocked(axios, true);
 i18next.init();
 let options: CalingaBackendOptions;
-const backendConnectorMock = {};
 
 describe('read', () => {
     beforeEach(() => {
