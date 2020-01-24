@@ -28,7 +28,7 @@ describe('read', () => {
         describe('no cache configured', () => {
             describe('no resources provided', () => {
                 it('should return nothing', done => {
-                    setupService(false);
+                    setupServiceUnavailable();
                     const backend = new CalingaBackend(i18next.services, options, {});
 
                     backend.read(language, namespace, (error, data) => {
@@ -40,7 +40,7 @@ describe('read', () => {
 
             describe('resources provided', () => {
                 it('should return translations from resources', done => {
-                    setupService(false);
+                    setupServiceUnavailable();
                     setupResources();
                     const backend = new CalingaBackend(i18next.services, options, {});
 
@@ -55,7 +55,7 @@ describe('read', () => {
 
         describe('cache configured', () => {
             it('should return translations from cache', done => {
-                setupService(false);
+                setupServiceUnavailable();
                 setupResources();
                 setupCache();
                 const backend = new CalingaBackend(i18next.services, options, {});
@@ -70,9 +70,8 @@ describe('read', () => {
     });
 
     describe('service reachable', () => {
-        console.log('broken tset');
         it('should return translations from service', done => {
-            setupService(true);
+            setupServiceAvailable();
             setupCache();
             setupResources();
 
@@ -98,7 +97,7 @@ describe('read', () => {
 
         describe('cache configured', () => {
             it('writes response to cache', done => {
-                setupService(true);
+                setupServiceAvailable();
                 setupCache();
                 setupResources();
                 const backendConnectorMock = {
@@ -127,7 +126,7 @@ describe('read', () => {
 describe('init', () => {
     describe('devmode enabled', () => {
         it('adds cimode to the languages', done => {
-            setupService(true);
+            setupServiceAvailable();
             CalingaBackend.onLanguagesChanged = l => {
                 expect(CalingaBackend.languages).toContain('cimode');
                 expect(CalingaBackend.languages).toContain('en');
@@ -139,7 +138,7 @@ describe('init', () => {
 
     describe('devmode not enabled', () => {
         it('returns only languages from service', done => {
-            setupService(true);
+            setupServiceAvailable();
             CalingaBackend.onLanguagesChanged = l => {
                 expect(CalingaBackend.languages).toContain('de');
                 expect(CalingaBackend.languages).toContain('en');
@@ -178,22 +177,22 @@ function setupCache() {
     };
 }
 
-function setupService(available: boolean) {
-    if (available) {
-        axiosMock.get.mockImplementation((url, o) => {
-            if (url.startsWith(options.serviceBaseUrl + 'translations')) {
-                return Promise.resolve({ status: 200, data: { [keyName]: fromServiceTranslation } });
-            } else if (url.startsWith(options.serviceBaseUrl + 'locales')) {
-                return Promise.resolve({
-                    status: 200,
-                    data: [
-                        { name: 'de', isReference: false },
-                        { name: 'en', isReference: true }
-                    ]
-                });
-            }
-        });
-    } else {
-        axiosMock.get.mockReturnValue(Promise.resolve({ status: 404 }));
-    }
+function setupServiceUnavailable() {
+    axiosMock.get.mockReturnValue(Promise.resolve({ status: 404 }));
+}
+
+function setupServiceAvailable() {
+    axiosMock.get.mockImplementation((url, o) => {
+        if (url.startsWith(options.serviceBaseUrl + 'translations')) {
+            return Promise.resolve({ status: 200, data: { [keyName]: fromServiceTranslation } });
+        } else if (url.startsWith(options.serviceBaseUrl + 'locales')) {
+            return Promise.resolve({
+                status: 200,
+                data: [
+                    { name: 'de', isReference: false },
+                    { name: 'en', isReference: true }
+                ]
+            });
+        }
+    });
 }
