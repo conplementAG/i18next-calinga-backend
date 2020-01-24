@@ -22,6 +22,7 @@ import { CalingaBackend, CalingaBackendOptions } from 'i18next-calinga-backend';
 ...
 
 const backendOptions: CalingaBackendOptions = {
+    project: '<YOUR_PROJECT_NAME_HERE>'
     version: 'v1',
     resources: {
         en: {
@@ -46,8 +47,10 @@ For use in React or React Native also add the following lines to the init option
 
 ```ts
 react: {
-  bindI18n: 'loaded'
+    bindI18n: 'loaded';
 }
 ```
+
+Available languages can be accessed at `CalingaBackend.languages` or by addding a handler for `CalingaBackend.onLanguageChanged`.
 
 For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
