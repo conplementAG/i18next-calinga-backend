@@ -68,7 +68,9 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         this.services = services;
         this.options = { ...this.getDefaultOptions(), ...backendOptions };
 
-        this.loadLanguages();
+        if (this.services) {
+            this.loadLanguages();
+        }
     }
 
     public create(languages: string[], namespace: string, key: string, fallbackValue: string) {}
