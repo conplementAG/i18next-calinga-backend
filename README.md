@@ -52,6 +52,6 @@ react: {
 ```
 
 Available languages can be accessed at `CalingaBackend.languages` or by addding a handler for `CalingaBackend.onLanguageChanged`.
-If `devMode` is set in `CalingaBackendOptions` this list also contains a language that shows keys (cimode).
+If `devMode` is set to `true` in `CalingaBackendOptions` this list also contains a language that shows keys (cimode).
 
 For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
