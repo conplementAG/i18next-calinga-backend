@@ -22,7 +22,7 @@ import { CalingaBackend, CalingaBackendOptions } from 'i18next-calinga-backend';
 ...
 
 const backendOptions: CalingaBackendOptions = {
-    project: '<YOUR_PROJECT_NAME_HERE>'
+    project: '<YOUR_PROJECT_NAME_HERE>',
     version: 'v1',
     resources: {
         en: {
@@ -52,5 +52,6 @@ react: {
 ```
 
 Available languages can be accessed at `CalingaBackend.languages` or by addding a handler for `CalingaBackend.onLanguageChanged`.
+If `devMode` is set in `CalingaBackendOptions` this list also contains a language that shows keys (cimode).
 
 For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
