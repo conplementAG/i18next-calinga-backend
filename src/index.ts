@@ -103,13 +103,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             {
                 language,
                 project: namespace,
-                version: this.options.version
+                version: this.options.version,
             },
             language,
             {}
         );
         try {
-            const response = await axios.get(url, { headers: { 'If-None-Match': checkSum } });
+            const response = await axios.get(url, { headers: { 'If-None-Match': `"${checkSum}"` } });
             if (response.status === 200) {
                 data = { ...data, ...response.data };
                 if (this.options.cache) {
@@ -136,15 +136,15 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             this.options.serviceBaseUrl + this.localesPath,
             {
                 project: this.options.project,
-                version: this.options.version
+                version: this.options.version,
             },
             undefined,
             {}
         );
         try {
-            axios.get(url).then(response => {
+            axios.get(url).then((response) => {
                 if (response.status === 200) {
-                    const languages = response.data.map(l => l.name);
+                    const languages = response.data.map((l) => l.name);
                     if (this.options.devMode) {
                         languages.push('cimode');
                     }
@@ -162,7 +162,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     private getDefaultOptions(): Partial<CalingaBackendOptions> {
         return {
             serviceBaseUrl: 'https://api.calinga.io/v1/',
-            version: 'v1'
+            version: 'v1',
         };
     }
 
