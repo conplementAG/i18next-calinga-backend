@@ -109,7 +109,10 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             {}
         );
         try {
-            const response = await axios.get(url, { headers: { 'If-None-Match': `"${checkSum}"` } });
+            const response = await axios.get(url, {
+                validateStatus: (status) => status === 200 || status === 304,
+                headers: { 'If-None-Match': `"${checkSum}"` },
+            });
             if (response.status === 200) {
                 data = { ...data, ...response.data };
                 if (this.options.cache) {
@@ -121,7 +124,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 }
             }
         } catch (error) {
-            this.services.logger('load translations failed', error);
+            this.services.logger.error('load translations failed', error);
         }
     }
 
