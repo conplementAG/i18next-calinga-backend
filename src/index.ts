@@ -124,7 +124,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 }
             }
         } catch (error) {
-            this.services.logger('load translations failed', error);
+            this.services.logger.error('load translations failed', error);
         }
     }
 
