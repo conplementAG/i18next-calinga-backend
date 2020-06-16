@@ -19,15 +19,17 @@ let options: CalingaBackendOptions;
 describe('read', () => {
     beforeEach(() => {
         options = {
+            organization: 'conplement',
+            team: 'Default Team',
             project: 'example',
-            serviceBaseUrl: 'https://api.calinga.io/v1/'
+            serviceBaseUrl: 'https://api.calinga.io/v3/',
         };
     });
 
     describe('service not reachable', () => {
         describe('no cache configured', () => {
             describe('no resources provided', () => {
-                it('should return nothing', done => {
+                it('should return nothing', (done) => {
                     setupServiceUnavailable();
                     const backend = new CalingaBackend(i18next.services, options, {});
 
@@ -39,7 +41,7 @@ describe('read', () => {
             });
 
             describe('resources provided', () => {
-                it('should return translations from resources', done => {
+                it('should return translations from resources', (done) => {
                     setupServiceUnavailable();
                     setupResources();
                     const backend = new CalingaBackend(i18next.services, options, {});
@@ -54,7 +56,7 @@ describe('read', () => {
         });
 
         describe('cache configured', () => {
-            it('should return translations from cache', done => {
+            it('should return translations from cache', (done) => {
                 setupServiceUnavailable();
                 setupResources();
                 setupCache();
@@ -70,7 +72,7 @@ describe('read', () => {
     });
 
     describe('service reachable', () => {
-        it('should return translations from service', done => {
+        it('should return translations from service', (done) => {
             setupServiceAvailable();
             setupCache();
             setupResources();
@@ -79,7 +81,7 @@ describe('read', () => {
                 loaded: (name, err, data) => {
                     expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
                     done();
-                }
+                },
             };
 
             const backend = new CalingaBackend(
@@ -96,7 +98,7 @@ describe('read', () => {
         });
 
         describe('cache configured', () => {
-            it('writes response to cache', done => {
+            it('writes response to cache', (done) => {
                 setupServiceAvailable();
                 setupCache();
                 setupResources();
@@ -104,7 +106,7 @@ describe('read', () => {
                     loaded: (name, err, data) => {
                         expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
                         done();
-                    }
+                    },
                 };
 
                 const backend = new CalingaBackend(
@@ -125,9 +127,9 @@ describe('read', () => {
 
 describe('init', () => {
     describe('devmode enabled', () => {
-        it('adds cimode to the languages', done => {
+        it('adds cimode to the languages', (done) => {
             setupServiceAvailable();
-            CalingaBackend.onLanguagesChanged = l => {
+            CalingaBackend.onLanguagesChanged = (l) => {
                 expect(CalingaBackend.languages).toContain('cimode');
                 expect(CalingaBackend.languages).toContain('en');
                 done();
@@ -137,9 +139,9 @@ describe('init', () => {
     });
 
     describe('devmode not enabled', () => {
-        it('returns only languages from service', done => {
+        it('returns only languages from service', (done) => {
             setupServiceAvailable();
-            CalingaBackend.onLanguagesChanged = l => {
+            CalingaBackend.onLanguagesChanged = (l) => {
                 expect(CalingaBackend.languages).toContain('de');
                 expect(CalingaBackend.languages).toContain('en');
                 done();
@@ -153,18 +155,18 @@ function setupResources() {
     options.resources = {
         [language]: {
             [namespace]: {
-                [keyName]: fromResourcesTranslation
-            }
-        }
+                [keyName]: fromResourcesTranslation,
+            },
+        },
     };
 }
 
 function setupCache() {
     const locale = {
-        [keyName]: fromCacheTranslation
+        [keyName]: fromCacheTranslation,
     };
     const cache = {
-        calinga_translations_default_en: JSON.stringify(locale)
+        calinga_translations_default_en: JSON.stringify(locale),
     };
     options.cache = {
         read(key: string) {
@@ -173,7 +175,7 @@ function setupCache() {
         write(key: string, value: string) {
             cache[key] = value;
             return Promise.resolve();
-        }
+        },
     };
 }
 
@@ -183,16 +185,16 @@ function setupServiceUnavailable() {
 
 function setupServiceAvailable() {
     axiosMock.get.mockImplementation((url, o) => {
-        if (url.startsWith(options.serviceBaseUrl + 'translations')) {
-            return Promise.resolve({ status: 200, data: { [keyName]: fromServiceTranslation } });
-        } else if (url.startsWith(options.serviceBaseUrl + 'locales')) {
+        if (url.endsWith('/languages')) {
             return Promise.resolve({
                 status: 200,
                 data: [
                     { name: 'de', isReference: false },
-                    { name: 'en', isReference: true }
-                ]
+                    { name: 'en', isReference: true },
+                ],
             });
+        } else {
+            return Promise.resolve({ status: 200, data: { [keyName]: fromServiceTranslation } });
         }
     });
 }

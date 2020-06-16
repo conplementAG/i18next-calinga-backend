@@ -21,13 +21,17 @@ export interface Cache {
 
 export interface CalingaBackendOptions {
     /*
+     * The name of the calinga organization
+     */
+    organization: string;
+    /*
+     * The name of the calinga team
+     */
+    team: string;
+    /*
      * The name of the calinga project
      */
     project: string;
-    /*
-     * The version of the Calinga project
-     */
-    version?: string;
     /*
      * The base URL of the Calinga service. Should not be changed.
      */
@@ -54,8 +58,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     services: Services;
     options: CalingaBackendOptions;
 
-    loadPath = 'translations/{{project}}/{{version}}/{{language}}';
-    localesPath = 'locales/{{project}}/{{version}}';
+    loadPath = '{{organization}}/{{team}}/{{project}}/languages/{{language}}';
+    localesPath = '{{organization}}/{{team}}/{{project}}/languages';
 
     static languages: string[];
     static onLanguagesChanged: (languages: string[]) => void;
@@ -103,7 +107,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             {
                 language,
                 project: namespace,
-                version: this.options.version,
+                organization: this.options.organization,
+                team: this.options.team,
             },
             language,
             {}
@@ -139,7 +144,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             this.options.serviceBaseUrl + this.localesPath,
             {
                 project: this.options.project,
-                version: this.options.version,
+                organization: this.options.organization,
+                team: this.options.team,
             },
             undefined,
             {}
@@ -164,8 +170,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
     private getDefaultOptions(): Partial<CalingaBackendOptions> {
         return {
-            serviceBaseUrl: 'https://api.calinga.io/v1/',
-            version: 'v1',
+            serviceBaseUrl: 'https://api.calinga.io/v3/',
         };
     }
 
