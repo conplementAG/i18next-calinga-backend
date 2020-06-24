@@ -38,7 +38,8 @@ i18n
   .use(CalingaBackend)
   .init({
     backend: backendOptions,
-    defaultNS: '<YOUR_PROJECT_NAME_HERE>'
+    defaultNS: '<YOUR_PROJECT_NAME_HERE>',
+    ...
   });
 
 ```
