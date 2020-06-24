@@ -1,4 +1,4 @@
-import i18next from 'i18next';
+import i18next, { InitOptions } from 'i18next';
 import { CalingaBackend, CalingaBackendOptions } from './';
 import axios from 'axios';
 import { mocked } from 'ts-jest/utils';
@@ -15,14 +15,18 @@ jest.mock('axios');
 const axiosMock = mocked(axios, true);
 i18next.init();
 let options: CalingaBackendOptions;
+let initOptions: InitOptions;
 
 describe('read', () => {
     beforeEach(() => {
         options = {
             organization: 'conplement',
             team: 'Default Team',
-            project: 'example',
             serviceBaseUrl: 'https://api.calinga.io/v3/',
+        };
+
+        initOptions = {
+            defaultNS: 'example',
         };
     });
 
@@ -31,7 +35,7 @@ describe('read', () => {
             describe('no resources provided', () => {
                 it('should return nothing', (done) => {
                     setupServiceUnavailable();
-                    const backend = new CalingaBackend(i18next.services, options, {});
+                    const backend = new CalingaBackend(i18next.services, options, initOptions);
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeUndefined();
@@ -44,7 +48,7 @@ describe('read', () => {
                 it('should return translations from resources', (done) => {
                     setupServiceUnavailable();
                     setupResources();
-                    const backend = new CalingaBackend(i18next.services, options, {});
+                    const backend = new CalingaBackend(i18next.services, options, initOptions);
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeDefined();
@@ -60,7 +64,7 @@ describe('read', () => {
                 setupServiceUnavailable();
                 setupResources();
                 setupCache();
-                const backend = new CalingaBackend(i18next.services, options, {});
+                const backend = new CalingaBackend(i18next.services, options, initOptions);
 
                 backend.read(language, namespace, (error, data) => {
                     expect(data).toBeDefined();
@@ -87,7 +91,7 @@ describe('read', () => {
             const backend = new CalingaBackend(
                 { ...i18next.services, backendConnector: backendConnectorMock },
                 options,
-                {}
+                initOptions
             );
 
             backend.read(language, namespace, (error, data) => {
@@ -112,7 +116,7 @@ describe('read', () => {
                 const backend = new CalingaBackend(
                     { ...i18next.services, backendConnector: backendConnectorMock },
                     options,
-                    {}
+                    initOptions
                 );
 
                 backend.read(language, namespace, async (error, data) => {
@@ -134,7 +138,7 @@ describe('init', () => {
                 expect(CalingaBackend.languages).toContain('en');
                 done();
             };
-            const backend = new CalingaBackend(i18next.services, { ...options, devMode: true }, {});
+            const backend = new CalingaBackend(i18next.services, { ...options, devMode: true }, initOptions);
         });
     });
 
@@ -146,7 +150,7 @@ describe('init', () => {
                 expect(CalingaBackend.languages).toContain('en');
                 done();
             };
-            const backend = new CalingaBackend(i18next.services, options, {});
+            const backend = new CalingaBackend(i18next.services, options, initOptions);
         });
     });
 });

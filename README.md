@@ -24,7 +24,6 @@ import { CalingaBackend, CalingaBackendOptions } from 'i18next-calinga-backend';
 const backendOptions: CalingaBackendOptions = {
     organization: '<YOUR_ORGANIZATION_NAME_HERE>',
     team: '<YOUR_TEAM_NAME_HERE>',
-    project: '<YOUR_PROJECT_NAME_HERE>',
     resources: {
         en: {
             default: en
@@ -39,7 +38,7 @@ i18n
   .use(CalingaBackend)
   .init({
     backend: backendOptions,
-    ...
+    defaultNS: '<YOUR_PROJECT_NAME_HERE>'
   });
 
 ```
