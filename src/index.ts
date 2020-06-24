@@ -29,10 +29,6 @@ export interface CalingaBackendOptions {
      */
     team: string;
     /*
-     * The name of the calinga project
-     */
-    project: string;
-    /*
      * The base URL of the Calinga service. Should not be changed.
      */
     serviceBaseUrl?: string;
@@ -57,6 +53,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
     services: Services;
     options: CalingaBackendOptions;
+    initOptions: InitOptions;
 
     loadPath = '{{organization}}/{{team}}/{{project}}/languages/{{language}}';
     localesPath = '{{organization}}/{{team}}/{{project}}/languages';
@@ -71,6 +68,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     public init(services: Services, backendOptions: CalingaBackendOptions, options: InitOptions) {
         this.services = services;
         this.options = { ...this.getDefaultOptions(), ...backendOptions };
+        this.initOptions = options;
 
         if (this.services) {
             this.loadLanguages();
@@ -143,7 +141,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         const url = this.services.interpolator.interpolate(
             this.options.serviceBaseUrl + this.localesPath,
             {
-                project: this.options.project,
+                project: this.initOptions.defaultNS,
                 organization: this.options.organization,
                 team: this.options.team,
             },
