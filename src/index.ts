@@ -72,6 +72,11 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         this.services = services;
         this.options = { ...this.getDefaultOptions(), ...backendOptions };
 
+        if (backendOptions) {
+            options.ns = [backendOptions.project];
+            options.defaultNS = backendOptions.project;
+        }
+
         if (this.services) {
             this.loadLanguages();
         }
