@@ -49,6 +49,11 @@ export interface CalingaBackendOptions {
      * Adds a development language if set to 'true'
      */
     devMode?: boolean;
+
+    /**
+     * Fetch draft translations if available
+     */
+    includeDrafts?: boolean;
 }
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
@@ -118,10 +123,12 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             language,
             {}
         );
+
         try {
             const response = await axios.get(url, {
                 validateStatus: (status) => status === 200 || status === 304,
                 headers: { 'If-None-Match': `"${checkSum}"` },
+                params: { includeDrafts: this.options.includeDrafts },
             });
             if (response.status === 200) {
                 data = { ...data, ...response.data };
@@ -134,7 +141,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 }
             }
         } catch (error) {
-            backendConnector.loaded(`${language}|${namespace}`, error, null)
+            backendConnector.loaded(`${language}|${namespace}`, error, null);
             this.services.logger.error('load translations failed', error);
         }
     }
