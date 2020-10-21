@@ -55,4 +55,6 @@ react: {
 Available languages can be accessed at `CalingaBackend.languages` or by addding a handler for `CalingaBackend.onLanguageChanged`.
 If `devMode` is set to `true` in `CalingaBackendOptions` this list also contains a language that shows keys (cimode).
 
+Set the `includeDrafts` option to `true` if your project has drafts enabled and you want so to see the pending version of your translations.
+
 For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
