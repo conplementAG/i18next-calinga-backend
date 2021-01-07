@@ -56,6 +56,10 @@ export interface CalingaBackendOptions {
     includeDrafts?: boolean;
 }
 
+function isI18NextDefaultNamespace(namespace: any) {
+    return namespace === 'translation';
+}
+
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     static type = 'backend';
     type: 'backend';
@@ -78,8 +82,12 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         this.options = { ...this.getDefaultOptions(), ...backendOptions };
 
         if (backendOptions) {
-            options.ns = options.ns || [backendOptions.project];
-            options.defaultNS = backendOptions.project;
+            if (isI18NextDefaultNamespace(options.ns)) {
+                options.ns = backendOptions.project;
+            }
+            if (isI18NextDefaultNamespace(options.defaultNS)) {
+                options.defaultNS = backendOptions.project;
+            }
         }
 
         if (this.services) {
@@ -87,7 +95,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         }
     }
 
-    public create(languages: string[], namespace: string, key: string, fallbackValue: string) {}
+    public create(languages: string[], namespace: string, key: string, fallbackValue: string) { }
 
     public async read(language: string, namespace: string, callback: ReadCallback) {
         let data;
