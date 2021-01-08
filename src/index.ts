@@ -56,8 +56,9 @@ export interface CalingaBackendOptions {
     includeDrafts?: boolean;
 }
 
-function isI18NextDefaultNamespace(namespace: any) {
-    return namespace === 'translation';
+function isI18NextDefaultNamespace(optionValue: any) {
+    return optionValue === 'translation'
+        || (Object.prototype.toString.call(optionValue) === "[object Array]" && optionValue.length === 1 && optionValue[0] === 'translation');
 }
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
@@ -74,7 +75,6 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     static onLanguagesChanged: (languages: string[]) => void;
 
     constructor(services: Services, backendOptions: CalingaBackendOptions, options: InitOptions) {
-        this.init(services, backendOptions, options);
     }
 
     public init(services: Services, backendOptions: CalingaBackendOptions, options: InitOptions) {
