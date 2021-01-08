@@ -75,9 +75,14 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     static onLanguagesChanged: (languages: string[]) => void;
 
     constructor(services: Services, backendOptions: CalingaBackendOptions, options: InitOptions) {
+        this.init(services, backendOptions, options);
     }
 
     public init(services: Services, backendOptions: CalingaBackendOptions, options: InitOptions) {
+        if (!services) {
+            return;
+        }
+
         this.services = services;
         this.options = { ...this.getDefaultOptions(), ...backendOptions };
 
