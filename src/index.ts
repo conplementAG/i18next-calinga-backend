@@ -1,5 +1,4 @@
 import { BackendModule, Services, ReadCallback, Resource, InitOptions } from 'i18next';
-import md5 from 'md5';
 import axios from 'axios';
 
 export interface Cache {
@@ -57,8 +56,12 @@ export interface CalingaBackendOptions {
 }
 
 function isI18NextDefaultNamespace(optionValue: any) {
-    return optionValue === 'translation'
-        || (Object.prototype.toString.call(optionValue) === "[object Array]" && optionValue.length === 1 && optionValue[0] === 'translation');
+    return (
+        optionValue === 'translation' ||
+        (Object.prototype.toString.call(optionValue) === '[object Array]' &&
+            optionValue.length === 1 &&
+            optionValue[0] === 'translation')
+    );
 }
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
@@ -100,11 +103,11 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         }
     }
 
-    public create(languages: string[], namespace: string, key: string, fallbackValue: string) { }
+    public create(languages: string[], namespace: string, key: string, fallbackValue: string) {}
 
     public async read(language: string, namespace: string, callback: ReadCallback) {
         let data;
-        let checkSum = '';
+        let etag = '';
 
         if (this.options.resources) {
             const languageResources = this.options.resources[language];
@@ -117,7 +120,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             const cachedData = await this.options.cache.read(this.buildKey(namespace, language));
 
             if (cachedData) {
-                checkSum = md5(cachedData);
+                etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
                 data = { ...data, ...JSON.parse(cachedData) };
             }
         }
@@ -140,15 +143,15 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         try {
             const response = await axios.get(url, {
                 validateStatus: (status) => status === 200 || status === 304,
-                headers: { 'If-None-Match': `"${checkSum}"` },
+                headers: { 'If-None-Match': etag },
                 params: { includeDrafts: this.options.includeDrafts },
             });
             if (response.status === 200) {
                 data = { ...data, ...response.data };
                 if (this.options.cache) {
-                    this.options.cache
-                        .write(this.buildKey(namespace, language), JSON.stringify(response.data))
-                        .then(() => backendConnector.loaded(`${language}|${namespace}`, null, data));
+                    await this.options.cache.write(this.buildEtagKey(namespace, language), response.headers['etag']);
+                    await this.options.cache.write(this.buildKey(namespace, language), JSON.stringify(response.data));
+                    backendConnector.loaded(`${language}|${namespace}`, null, data);
                 } else {
                     backendConnector.loaded(`${language}|${namespace}`, null, data);
                 }
@@ -202,5 +205,9 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
     private buildKey(namespace: string, language: string) {
         return `calinga_translations_${namespace}_${language}`;
+    }
+
+    private buildEtagKey(namespace: string, language: string) {
+        return `calinga_etag_${namespace}_${language}`;
     }
 }

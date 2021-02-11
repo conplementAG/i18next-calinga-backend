@@ -27,12 +27,10 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "i18next": "^19.4.5",
-    "md5": "^2.2.1"
+    "i18next": "^19.4.5"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/md5": "^2.2.0",
     "jest": "^26.0.1",
     "rollup": "^2.15.0",
     "rollup-plugin-typescript2": "^0.27.1",
