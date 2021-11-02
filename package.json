@@ -1,6 +1,6 @@
 {
   "name": "i18next-calinga-backend",
-  "version": "0.10.3",
+  "version": "0.10.4",
   "keywords": [
     "i18next",
     "i18next-backend",
@@ -26,16 +26,16 @@
     "test": "jest"
   },
   "dependencies": {
-    "axios": "^0.21.2",
-    "i18next": "^19.4.5"
+    "axios": "^0.24.0",
+    "i18next": "^21.4.0"
   },
   "devDependencies": {
-    "@types/jest": "^25.2.3",
-    "jest": "^26.0.1",
+    "@types/jest": "^27.0.2",
+    "jest": "^27.3.1",
     "rollup": "^2.15.0",
-    "rollup-plugin-typescript2": "^0.27.1",
-    "ts-jest": "^26.1.0",
-    "typescript": "^3.9.5"
+    "rollup-plugin-typescript2": "^0.30.0",
+    "ts-jest": "^27.0.7",
+    "typescript": "^4.4.4"
   },
   "prettier": {
     "singleQuote": true,
