@@ -142,9 +142,9 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
 
         try {
             const response = await axios.get(url, {
-                //validateStatus: (status) => status === 200 || status === 304,
-                // headers: { 'If-None-Match': etag },
-                // params: { includeDrafts: this.options.includeDrafts },
+                validateStatus: (status) => status === 200 || status === 304,
+                headers: { 'If-None-Match': etag },
+                params: { includeDrafts: this.options.includeDrafts },
             });
             if (response.status === 200) {
                 data = { ...data, ...response.data };
