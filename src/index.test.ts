@@ -1,7 +1,6 @@
 import i18next from 'i18next';
 import { CalingaBackend, CalingaBackendOptions } from './';
 import axios from 'axios';
-import { mocked } from 'ts-jest/utils';
 
 const keyName = 'origin';
 const language = 'en';
@@ -12,7 +11,7 @@ const fromCacheTranslation = 'from cache';
 const fromServiceTranslation = 'from service';
 
 jest.mock('axios');
-const axiosMock = mocked(axios, true);
+const axiosMock = jest.mocked(axios, true);
 i18next.init();
 let options: CalingaBackendOptions;
 
@@ -194,7 +193,7 @@ function setupServiceAvailable() {
                 ],
             });
         } else {
-            return Promise.resolve({ status: 200, data: { [keyName]: fromServiceTranslation } });
+            return Promise.resolve({ status: 200, headers: { etag: "123" }, data: { [keyName]: fromServiceTranslation } });
         }
     });
 }
