@@ -122,10 +122,9 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             if (cachedData) {
                 etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
                 data = { ...data, ...JSON.parse(cachedData) };
+                callback(null, data);
             }
         }
-
-        callback(null, data);
 
         const backendConnector = this.services.backendConnector;
         const url = this.services.interpolator.interpolate(
@@ -151,13 +150,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 if (this.options.cache) {
                     await this.options.cache.write(this.buildEtagKey(namespace, language), response.headers['etag']);
                     await this.options.cache.write(this.buildKey(namespace, language), JSON.stringify(response.data));
-                    backendConnector.loaded(`${language}|${namespace}`, null, data);
-                } else {
-                    backendConnector.loaded(`${language}|${namespace}`, null, data);
                 }
+                backendConnector.loaded(`${language}|${namespace}`, null, data);
+                callback(null, data);
             }
         } catch (error) {
             backendConnector.loaded(`${language}|${namespace}`, error, null);
+            callback(error, null);
             this.services.logger.error('load translations failed', error);
         }
     }
