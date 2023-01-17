@@ -57,4 +57,4 @@ If `devMode` is set to `true` in `CalingaBackendOptions` this list also contains
 
 Set the `includeDrafts` option to `true` if your project has drafts enabled and you want so to see the pending version of your translations.
 
-For a full integration sample for react native including a cache have a look [here](https://github.com/conplementAG/calinga-react-native-demo).
+For a full integration sample for nodejs including a cache have a look [here](https://github.com/conplementAG/calinga-nodejs-demo).
