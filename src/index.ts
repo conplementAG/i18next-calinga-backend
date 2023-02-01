@@ -109,6 +109,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         let data;
         let etag = '';
 
+        console.log('checkpoint');
         if (this.options.resources) {
             const languageResources = this.options.resources[language];
             if (languageResources) {
@@ -122,7 +123,6 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             if (cachedData) {
                 etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
                 data = { ...data, ...JSON.parse(cachedData) };
-                callback(null, data);
             }
         }
 
@@ -152,8 +152,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                     await this.options.cache.write(this.buildKey(namespace, language), JSON.stringify(response.data));
                 }
                 backendConnector.loaded(`${language}|${namespace}`, null, data);
-                callback(null, data);
             }
+            callback(null, data);
         } catch (error) {
             backendConnector.loaded(`${language}|${namespace}`, error, null);
             callback(error, null);
