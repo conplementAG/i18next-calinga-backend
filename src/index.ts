@@ -109,7 +109,6 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         let data;
         let etag = '';
 
-        console.log('checkpoint');
         if (this.options.resources) {
             const languageResources = this.options.resources[language];
             if (languageResources) {
