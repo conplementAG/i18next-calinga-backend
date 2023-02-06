@@ -53,6 +53,11 @@ export interface CalingaBackendOptions {
      * Fetch draft translations if available
      */
     includeDrafts?: boolean;
+
+    /**
+     * API Token for the Project if required
+     */
+    apiToken?: string;
 }
 
 function isI18NextDefaultNamespace(optionValue: any) {
@@ -62,6 +67,11 @@ function isI18NextDefaultNamespace(optionValue: any) {
             optionValue.length === 1 &&
             optionValue[0] === 'translation')
     );
+}
+
+function setApiToken(token: string)
+{
+    axios.defaults.headers['api-token'] = token;
 }
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
@@ -96,6 +106,10 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             if (isI18NextDefaultNamespace(options.defaultNS)) {
                 options.defaultNS = backendOptions.project;
             }
+        }
+
+        if(backendOptions.apiToken){
+            setApiToken(backendOptions.apiToken);
         }
 
         if (this.services) {
