@@ -25,6 +25,7 @@ const backendOptions: CalingaBackendOptions = {
     organization: '<YOUR_ORGANIZATION_NAME_HERE>',
     team: '<YOUR_TEAM_NAME_HERE>',
     project: '<YOUR_PROJECT_NAME_HERE>',
+    api-token: '<YOUR_PROJECTS_API_TOKEN_HERE>'
     resources: {
         en: {
             default: en
