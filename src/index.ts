@@ -53,6 +53,11 @@ export interface CalingaBackendOptions {
      * Fetch draft translations if available
      */
     includeDrafts?: boolean;
+
+    /**
+     * API Token for the Project if required
+     */
+    apiToken?: string;
 }
 
 function isI18NextDefaultNamespace(optionValue: any) {
@@ -62,6 +67,11 @@ function isI18NextDefaultNamespace(optionValue: any) {
             optionValue.length === 1 &&
             optionValue[0] === 'translation')
     );
+}
+
+function setApiToken(token: string)
+{
+    axios.defaults.headers['api-token'] = token;
 }
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
@@ -98,6 +108,10 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             }
         }
 
+        if(backendOptions.apiToken){
+            setApiToken(backendOptions.apiToken);
+        }
+
         if (this.services) {
             this.loadLanguages();
         }
@@ -122,10 +136,10 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             if (cachedData) {
                 etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
                 data = { ...data, ...JSON.parse(cachedData) };
+                callback(null, data)
+                return;
             }
         }
-
-        callback(null, data);
 
         const backendConnector = this.services.backendConnector;
         const url = this.services.interpolator.interpolate(
@@ -151,13 +165,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 if (this.options.cache) {
                     await this.options.cache.write(this.buildEtagKey(namespace, language), response.headers['etag']);
                     await this.options.cache.write(this.buildKey(namespace, language), JSON.stringify(response.data));
-                    backendConnector.loaded(`${language}|${namespace}`, null, data);
-                } else {
-                    backendConnector.loaded(`${language}|${namespace}`, null, data);
                 }
+                backendConnector?.loaded(`${language}|${namespace}`, null, data);
             }
+            callback(null, data);
         } catch (error) {
-            backendConnector.loaded(`${language}|${namespace}`, error, null);
+            backendConnector?.loaded(`${language}|${namespace}`, error, null);
+            callback(error, null);
             this.services.logger.error('load translations failed', error);
         }
     }

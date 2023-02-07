@@ -1,4 +1,4 @@
-import i18next from 'i18next';
+import i18next, { ResourceKey } from 'i18next';
 import { CalingaBackend, CalingaBackendOptions } from './';
 import axios from 'axios';
 
@@ -47,7 +47,7 @@ describe('read', () => {
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeDefined();
-                        expect(data[keyName]).toBe(fromResourcesTranslation);
+                        expect((data as ResourceKey)[keyName]).toBe(fromResourcesTranslation);
                         done();
                     });
                 });
@@ -63,7 +63,7 @@ describe('read', () => {
 
                 backend.read(language, namespace, (error, data) => {
                     expect(data).toBeDefined();
-                    expect(data[keyName]).toBe(fromCacheTranslation);
+                    expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
                     done();
                 });
             });
@@ -91,7 +91,7 @@ describe('read', () => {
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
-                expect(data[keyName]).toBe(fromCacheTranslation);
+                expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
                 done();
             });
         });
@@ -115,7 +115,7 @@ describe('read', () => {
                 );
 
                 backend.read(language, namespace, async (error, data) => {
-                    const cachedData = await options.cache.read('calinga_translations_default_en');
+                    const cachedData = await options!.cache!.read('calinga_translations_default_en');
                     expect(JSON.parse(cachedData)[keyName]).toBe(fromCacheTranslation);
                     done();
                 });
@@ -133,7 +133,7 @@ describe('init', () => {
                 expect(CalingaBackend.languages).toContain('en');
                 done();
             };
-            const backend = new CalingaBackend(i18next.services, { ...options, devMode: true }, {});
+            new CalingaBackend(i18next.services, { ...options, devMode: true }, {});
         });
     });
 
@@ -145,7 +145,7 @@ describe('init', () => {
                 expect(CalingaBackend.languages).toContain('en');
                 done();
             };
-            const backend = new CalingaBackend(i18next.services, options, {});
+            new CalingaBackend(i18next.services, options, {});
         });
     });
 });
