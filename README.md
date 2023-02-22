@@ -7,13 +7,13 @@ An i18next backend to connect to the Calinga service.
 
 ## Getting Started
 
-Installation:
+### Installation
 
 ```
 npm install i18next-calinga-backend
 ```
 
-Usage:
+### Usage
 
 ```ts
 import i18n from 'i18next';
@@ -45,6 +45,8 @@ i18n
 
 ```
 
+### Usage with React
+
 For use in React or React Native also add the following lines to the init options:
 
 ```ts
@@ -53,9 +55,29 @@ react: {
 }
 ```
 
+### Namespaces
+
+If custom namespaces are used e.g.
+
+```ts
+i18next.init({
+    ...
+    ns:['myNamespace1'],
+    ...
+  }
+```
+
+these namespaces must match project names in calinga and translations will be fetched from there accordingly.
+
+### List of available languages
+
 Available languages can be accessed at `CalingaBackend.languages` or by addding a handler for `CalingaBackend.onLanguageChanged`.
 If `devMode` is set to `true` in `CalingaBackendOptions` this list also contains a language that shows keys (cimode).
 
+### Draft translations
+
 Set the `includeDrafts` option to `true` if your project has drafts enabled and you want so to see the pending version of your translations.
+
+### Example
 
 For a full integration sample for nodejs including a cache have a look [here](https://github.com/conplementAG/calinga-nodejs-demo).
