@@ -26,7 +26,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "^1.6.0",
     "i18next": "^21.4.0"
   },
   "devDependencies": {
