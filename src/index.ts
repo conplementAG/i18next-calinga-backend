@@ -134,10 +134,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             const cachedData = await this.options.cache.read(this.buildKey(namespace, language));
 
             if (cachedData) {
-                etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
+                etag = (await this.options.cache.read(this.buildEtagKey(namespace, language))) || '';
                 data = { ...data, ...JSON.parse(cachedData) };
-                callback(null, data)
-                return;
             }
         }
 
@@ -170,9 +168,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             }
             callback(null, data);
         } catch (error) {
-            backendConnector?.loaded(`${language}|${namespace}`, error, null);
-            callback(error, null);
-            this.services.logger.error('load translations failed', error);
+            if (data) {
+                callback(null, data);
+            } else {
+                backendConnector?.loaded(`${language}|${namespace}`, error, null);
+                callback(error, null);
+                this.services.logger.error('load translations failed', error);
+            }
         }
     }
 
