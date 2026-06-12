@@ -124,6 +124,121 @@ describe('read', () => {
     });
 });
 
+describe('read with keys filter', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        options = {
+            organization: 'conplement',
+            team: 'Default Team',
+            project: 'example',
+            serviceBaseUrl: 'https://api.calinga.io/v3/',
+        };
+    });
+
+    it('issues POST with keyNames body when keys option is set', (done) => {
+        setupServiceAvailableWithFilteredPost();
+        options.keys = [keyName];
+        const backend = new CalingaBackend(i18next.services, options, {});
+
+        backend.read(language, namespace, (error, data) => {
+            expect(error).toBeNull();
+            expect((data as ResourceKey)[keyName]).toBe(fromServiceTranslation);
+
+            const postCalls = axiosMock.post.mock.calls;
+            const translationsCall = postCalls.find((c) => (c[0] as string).endsWith(`/languages/${language}`));
+            expect(translationsCall).toBeDefined();
+            expect(translationsCall![1]).toEqual({ keyNames: [keyName] });
+
+            const translationsGet = axiosMock.get.mock.calls.find((c) =>
+                (c[0] as string).endsWith(`/languages/${language}`)
+            );
+            expect(translationsGet).toBeUndefined();
+
+            done();
+        });
+    });
+
+    it('writes filtered response to cache', (done) => {
+        setupServiceAvailableWithFilteredPost();
+        const cache: Record<string, string> = {};
+        options.cache = {
+            read: (key) => Promise.resolve(cache[key]),
+            write: (key, value) => {
+                cache[key] = value;
+                return Promise.resolve();
+            },
+        };
+        options.keys = [keyName];
+        const backend = new CalingaBackend(i18next.services, options, {});
+
+        backend.read(language, namespace, () => {
+            const slot = Object.keys(cache).find((k) => k.startsWith('calinga_translations_default_en_'));
+            expect(slot).toBeDefined();
+            expect(JSON.parse(cache[slot!])[keyName]).toBe(fromServiceTranslation);
+            done();
+        });
+    });
+
+    it('returns an error to the callback when the filtered response is empty', (done) => {
+        setupServiceAvailableWithEmptyFilteredPost();
+        options.keys = [keyName];
+        const loggerErrorMock = jest.fn();
+        const services = { ...i18next.services, logger: { ...i18next.services.logger, error: loggerErrorMock } };
+        const backend = new CalingaBackend(services as any, options, {});
+
+        backend.read(language, namespace, (error, data) => {
+            expect(error).toBeDefined();
+            expect(error).not.toBeNull();
+            expect((error as Error).message).toMatch(/keys not found/i);
+            expect(data).toBeNull();
+            expect(loggerErrorMock).toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('uses a separate cache slot for each distinct keys list', (done) => {
+        setupServiceAvailableWithFilteredPost();
+        const cache: Record<string, string> = {
+            calinga_translations_default_en: JSON.stringify({ [keyName]: fromCacheTranslation }),
+        };
+        options.cache = {
+            read: (key) => Promise.resolve(cache[key]),
+            write: (key, value) => {
+                cache[key] = value;
+                return Promise.resolve();
+            },
+        };
+        options.keys = [keyName];
+        const backend = new CalingaBackend(i18next.services, options, {});
+
+        backend.read(language, namespace, (error, data) => {
+            expect(error).toBeNull();
+            expect((data as ResourceKey)[keyName]).toBe(fromServiceTranslation);
+            expect(cache['calinga_translations_default_en']).toBe(
+                JSON.stringify({ [keyName]: fromCacheTranslation })
+            );
+            const filteredSlots = Object.keys(cache).filter(
+                (k) => k.startsWith('calinga_translations_default_en_') && k !== 'calinga_translations_default_en'
+            );
+            expect(filteredSlots.length).toBe(1);
+            done();
+        });
+    });
+
+    it('falls back to GET when keys option is unset', (done) => {
+        setupServiceAvailable();
+        const backend = new CalingaBackend(i18next.services, options, {});
+
+        backend.read(language, namespace, () => {
+            const translationsPost = axiosMock.post.mock.calls.find((c) =>
+                (c[0] as string).endsWith(`/languages/${language}`)
+            );
+            expect(translationsPost).toBeUndefined();
+            done();
+        });
+    });
+});
+
 describe('init', () => {
     describe('devmode enabled', () => {
         it('adds cimode to the languages', (done) => {
@@ -196,4 +311,38 @@ function setupServiceAvailable() {
             return Promise.resolve({ status: 200, headers: { etag: "123" }, data: { [keyName]: fromServiceTranslation } });
         }
     });
+}
+
+function setupServiceAvailableWithFilteredPost() {
+    axiosMock.get.mockImplementation((url) => {
+        if (url.endsWith('/languages')) {
+            return Promise.resolve({
+                status: 200,
+                data: [
+                    { name: 'de', isReference: false },
+                    { name: 'en', isReference: true },
+                ],
+            });
+        }
+        return Promise.resolve({ status: 404 });
+    });
+    axiosMock.post.mockImplementation(() =>
+        Promise.resolve({ status: 200, headers: { etag: '123' }, data: { [keyName]: fromServiceTranslation } })
+    );
+}
+
+function setupServiceAvailableWithEmptyFilteredPost() {
+    axiosMock.get.mockImplementation((url) => {
+        if (url.endsWith('/languages')) {
+            return Promise.resolve({
+                status: 200,
+                data: [
+                    { name: 'de', isReference: false },
+                    { name: 'en', isReference: true },
+                ],
+            });
+        }
+        return Promise.resolve({ status: 404 });
+    });
+    axiosMock.post.mockImplementation(() => Promise.resolve({ status: 200, headers: {}, data: {} }));
 }
