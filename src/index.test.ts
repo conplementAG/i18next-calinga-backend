@@ -11,7 +11,7 @@ const fromCacheTranslation = 'from cache';
 const fromServiceTranslation = 'from service';
 
 jest.mock('axios');
-const axiosMock = jest.mocked(axios, true);
+const axiosMock = jest.mocked(axios);
 i18next.init();
 let options: CalingaBackendOptions;
 
@@ -47,7 +47,7 @@ describe('read', () => {
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeDefined();
-                        expect((data as ResourceKey)[keyName]).toBe(fromResourcesTranslation);
+                        expect((data as any)[keyName]).toBe(fromResourcesTranslation);
                         done();
                     });
                 });
@@ -63,7 +63,7 @@ describe('read', () => {
 
                 backend.read(language, namespace, (error, data) => {
                     expect(data).toBeDefined();
-                    expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
+                    expect((data as any)[keyName]).toBe(fromCacheTranslation);
                     done();
                 });
             });
@@ -77,7 +77,7 @@ describe('read', () => {
             setupResources();
 
             const backendConnectorMock = {
-                loaded: (name, err, data) => {
+                loaded: (name: any, err: any, data: any) => {
                     expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
                     done();
                 },
@@ -91,7 +91,7 @@ describe('read', () => {
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
-                expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
+                expect((data as any)[keyName]).toBe(fromCacheTranslation);
                 done();
             });
         });
@@ -102,7 +102,7 @@ describe('read', () => {
                 setupCache();
                 setupResources();
                 const backendConnectorMock = {
-                    loaded: (name, err, data) => {
+                    loaded: (name: any, err: any, data: any) => {
                         expect(data).toMatchObject({ [keyName]: fromServiceTranslation });
                         done();
                     },
@@ -164,7 +164,7 @@ function setupCache() {
     const locale = {
         [keyName]: fromCacheTranslation,
     };
-    const cache = {
+    const cache: Record<string, string> = {
         calinga_translations_default_en: JSON.stringify(locale),
     };
     options.cache = {
@@ -183,7 +183,7 @@ function setupServiceUnavailable() {
 }
 
 function setupServiceAvailable() {
-    axiosMock.get.mockImplementation((url, o) => {
+    axiosMock.get.mockImplementation((url: string, o?: any) => {
         if (url.endsWith('/languages')) {
             return Promise.resolve({
                 status: 200,
