@@ -78,6 +78,24 @@ If `devMode` is set to `true` in `CalingaBackendOptions` this list also contains
 
 Set the `includeDrafts` option to `true` if your project has drafts enabled and you want so to see the pending version of your translations.
 
+### Filtering by keys
+
+If your application only uses a known subset of the keys configured in your Calinga project, set the `keys` option to that list. The backend will then call the Consumer API's filtered endpoint and only fetch translations for those keys. When the option is omitted or set to an empty array, all translations are fetched as before.
+
+```ts
+const backendOptions: CalingaBackendOptions = {
+    organization: '<YOUR_ORGANIZATION_NAME_HERE>',
+    team: '<YOUR_TEAM_NAME_HERE>',
+    project: '<YOUR_PROJECT_NAME_HERE>',
+    apiToken: '<YOUR_PROJECTS_API_TOKEN_HERE>',
+    keys: ['welcome', 'logout', 'errors.notFound']
+};
+```
+
+The filter applies to every translation request made by the backend (i.e. for every language and namespace loaded by i18next). If none of the requested keys are known to the server, the i18next load callback is invoked with an error.
+
+> **Note:** The `keys` option is intended as a **static, app-wide configuration** — typically a fixed list of keys your application is known to use. If a `cache` is configured, a separate cache slot is created per distinct keys list, so changing the list at runtime works correctly. However, generating a different keys list on every load (e.g. per screen, per user, per request) is **not** a supported use case: the cache effectively becomes useless (every list is a cache miss) and the cache grows unbounded as orphan slots accumulate.
+
 ### Example
 
 For a full integration sample for nodejs including a cache have a look [here](https://github.com/conplementAG/calinga-nodejs-demo).
