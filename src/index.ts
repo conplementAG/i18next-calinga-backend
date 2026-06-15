@@ -185,10 +185,11 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             }
             callback(null, data);
         } catch (error) {
-            backendConnector?.loaded(`${language}|${namespace}`, error as Error, null);
+            error = error as Error
+            backendConnector?.loaded(`${language}|${namespace}`, error, null);
             callback(error as Error, null);
             this.services.logger.error('load translations failed', error);
-            callback(error, null);
+            callback(error as Error, null);
         }
     }
 
