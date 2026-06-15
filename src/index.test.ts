@@ -11,7 +11,7 @@ const fromCacheTranslation = 'from cache';
 const fromServiceTranslation = 'from service';
 
 jest.mock('axios');
-const axiosMock = jest.mocked(axios, true);
+const axiosMock = jest.mocked(axios);
 i18next.init();
 let options: CalingaBackendOptions;
 
@@ -51,7 +51,7 @@ describe('read', () => {
 
                     backend.read(language, namespace, (error, data) => {
                         expect(data).toBeDefined();
-                        expect((data as ResourceKey)[keyName]).toBe(fromResourcesTranslation);
+                        expect((data as any)[keyName]).toBe(fromResourcesTranslation);
                         done();
                     });
                 });
@@ -67,7 +67,7 @@ describe('read', () => {
 
                 backend.read(language, namespace, (error, data) => {
                     expect(data).toBeDefined();
-                    expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
+                    expect((data as any)[keyName]).toBe(fromCacheTranslation);
                     done();
                 });
             });
@@ -125,6 +125,7 @@ describe('read', () => {
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
+                expect((data as any)[keyName]).toBe(fromCacheTranslation);
                 done();
             });
         });
@@ -373,7 +374,7 @@ function setupServiceUnavailable() {
 }
 
 function setupServiceAvailable() {
-    axiosMock.get.mockImplementation((url, o) => {
+    axiosMock.get.mockImplementation((url: string, o?: any) => {
         if (url.endsWith('/languages')) {
             return Promise.resolve({
                 status: 200,

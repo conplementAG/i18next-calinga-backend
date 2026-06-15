@@ -76,10 +76,10 @@ function setApiToken(token: string)
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     static type = 'backend';
-    type: 'backend';
+    type: 'backend' = 'backend';
 
-    services: Services;
-    options: CalingaBackendOptions;
+    services!: Services;
+    options!: CalingaBackendOptions;
 
     loadPath = '{{organization}}/{{team}}/{{project}}/languages/{{language}}';
     localesPath = '{{organization}}/{{team}}/{{project}}/languages';
@@ -120,7 +120,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     public create(languages: string[], namespace: string, key: string, fallbackValue: string) {}
 
     public async read(language: string, namespace: string, callback: ReadCallback) {
-        let data;
+        let data: any;
         let etag = '';
 
         if (this.options.resources) {
@@ -192,13 +192,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 organization: this.options.organization,
                 team: this.options.team,
             },
-            undefined,
+            '',
             {}
         );
         try {
             axios.get(url).then((response) => {
                 if (response.status === 200) {
-                    const languages = response.data.map((l) => l.name);
+                    const languages = response.data.map((l: { name: string }) => l.name);
                     if (this.options.devMode) {
                         languages.push('cimode');
                     }
