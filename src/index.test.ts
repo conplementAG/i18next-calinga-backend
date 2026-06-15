@@ -1,4 +1,4 @@
-import i18next, { ResourceKey } from 'i18next';
+import i18next from 'i18next';
 import { CalingaBackend, CalingaBackendOptions } from './';
 import axios from 'axios';
 
@@ -142,7 +142,7 @@ describe('read with keys filter', () => {
 
         backend.read(language, namespace, (error, data) => {
             expect(error).toBeNull();
-            expect((data as ResourceKey)[keyName]).toBe(fromServiceTranslation);
+            expect((data as any)[keyName]).toBe(fromServiceTranslation);
 
             const postCalls = axiosMock.post.mock.calls;
             const translationsCall = postCalls.find((c) => (c[0] as string).endsWith(`/languages/${language}`));
@@ -213,7 +213,7 @@ describe('read with keys filter', () => {
 
         backend.read(language, namespace, (error, data) => {
             expect(error).toBeNull();
-            expect((data as ResourceKey)[keyName]).toBe(fromServiceTranslation);
+            expect((data as any)[keyName]).toBe(fromServiceTranslation);
             expect(cache['calinga_translations_default_en']).toBe(
                 JSON.stringify({ [keyName]: fromCacheTranslation })
             );
