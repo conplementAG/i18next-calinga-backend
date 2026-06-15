@@ -61,6 +61,14 @@ export interface CalingaBackendOptions {
      * API Token for the Project if required
      */
     apiToken?: string;
+
+    /**
+     * If set, only translations for the given keys will be fetched from the
+     * Calinga Consumer API. When omitted or empty, all translations are fetched as before.
+     * 
+     * One cache entry is generated per key list. Consider this when using many differing key lists.
+     */
+    keys?: string[];
 }
 
 function isI18NextDefaultNamespace(optionValue: any) {
@@ -79,10 +87,10 @@ function setApiToken(token: string)
 
 export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     static type = 'backend';
-    type: 'backend';
+    type: 'backend' = 'backend';
 
-    services: Services;
-    options: CalingaBackendOptions;
+    services!: Services;
+    options!: CalingaBackendOptions;
 
     loadPath = '{{organization}}/{{team}}/{{project}}/languages/{{language}}';
     localesPath = '{{organization}}/{{team}}/{{project}}/languages';
@@ -123,7 +131,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     public create(languages: string[], namespace: string, key: string, fallbackValue: string) {}
 
     public async read(language: string, namespace: string, callback: ReadCallback) {
-        let data;
+        let data: any;
         let etag = '';
 
         if (this.options.resources) {
@@ -137,10 +145,8 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             const cachedData = await this.options.cache.read(this.buildKey(namespace, language));
 
             if (cachedData) {
-                etag = await this.options.cache.read(this.buildEtagKey(namespace, language));
+                etag = (await this.options.cache.read(this.buildEtagKey(namespace, language))) || '';
                 data = { ...data, ...JSON.parse(cachedData) };
-                callback(null, data)
-                return;
             }
         }
 
@@ -162,8 +168,14 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 validateStatus: (status) => status === 200 || status === 304,
                 headers: { 'If-None-Match': etag, ...clientVersionHeader },
                 params: { includeDrafts: this.options.includeDrafts },
-            });
+            };
+            const response = filteredKeys && filteredKeys.length > 0
+                ? await axios.post(url, { keyNames: filteredKeys }, requestConfig)
+                : await axios.get(url, requestConfig);
             if (response.status === 200) {
+                if (filteredKeys && filteredKeys.length > 0 && (response.data == null || Object.keys(response.data).length === 0)) {
+                    throw new Error(`Keys not found for language '${language}' in namespace '${namespace}'`);
+                }
                 data = { ...data, ...response.data };
                 if (this.options.cache) {
                     await this.options.cache.write(this.buildEtagKey(namespace, language), response.headers['etag']);
@@ -173,9 +185,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             }
             callback(null, data);
         } catch (error) {
-            backendConnector?.loaded(`${language}|${namespace}`, error, null);
-            callback(error, null);
-            this.services.logger.error('load translations failed', error);
+            if (data) {
+                callback(null, data);
+            } else {
+                backendConnector?.loaded(`${language}|${namespace}`, error, null);
+                callback(error, null);
+                this.services.logger.error('load translations failed', error);
+            }
         }
     }
 
@@ -193,13 +209,13 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
                 organization: this.options.organization,
                 team: this.options.team,
             },
-            undefined,
+            '',
             {}
         );
         try {
             axios.get(url, { headers: { ...clientVersionHeader } }).then((response) => {
                 if (response.status === 200) {
-                    const languages = response.data.map((l) => l.name);
+                    const languages = response.data.map((l: { name: string }) => l.name);
                     if (this.options.devMode) {
                         languages.push('cimode');
                     }
@@ -221,10 +237,24 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     }
 
     private buildKey(namespace: string, language: string) {
-        return `calinga_translations_${namespace}_${language}`;
+        return `calinga_translations_${namespace}_${language}${this.keysSuffix()}`;
     }
 
     private buildEtagKey(namespace: string, language: string) {
-        return `calinga_etag_${namespace}_${language}`;
+        return `calinga_etag_${namespace}_${language}${this.keysSuffix()}`;
+    }
+
+    private keysSuffix(): string {
+        const keys = this.options.keys;
+        if (!keys || keys.length === 0) {
+            return '';
+        }
+        const sorted = [...keys].sort().join('|');
+        let hash = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            hash = ((hash << 5) - hash) + sorted.charCodeAt(i);
+            hash |= 0;
+        }
+        return `_${(hash >>> 0).toString(36)}`;
     }
 }

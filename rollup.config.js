@@ -22,6 +22,9 @@ export default {
     json(),
     typescript({
       typescript: require('typescript'),
+      tsconfigOverride: {
+        exclude: ['**/*.test.ts'],
+      },
     }),
   ],
 }

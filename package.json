@@ -1,6 +1,6 @@
 {
   "name": "i18next-calinga-backend",
-  "version": "0.10.16",
+  "version": "0.11.0",
   "keywords": [
     "i18next",
     "i18next-backend",
@@ -23,11 +23,12 @@
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs",
     "watch": "rollup -cw --bundleConfigAsCjs",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "axios": "^1.7.4",
-    "i18next": "^21.4.0"
+    "axios": "^1.17.0",
+    "i18next": "^23.16.8"
   },
   "devDependencies": {
     "@rollup/plugin-json": "^6.1.0",
