@@ -58,6 +58,14 @@ export interface CalingaBackendOptions {
      * API Token for the Project if required
      */
     apiToken?: string;
+
+    /**
+     * If set, only translations for the given keys will be fetched from the
+     * Calinga Consumer API. When omitted or empty, all translations are fetched as before.
+     * 
+     * One cache entry is generated per key list. Consider this when using many differing key lists.
+     */
+    keys?: string[];
 }
 
 function isI18NextDefaultNamespace(optionValue: any) {
@@ -153,12 +161,19 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         );
 
         try {
-            const response = await axios.get(url, {
-                validateStatus: (status) => status === 200 || status === 304,
+            const filteredKeys = this.options.keys;
+            const requestConfig = {
+                validateStatus: (status: number) => status === 200 || status === 304,
                 headers: { 'If-None-Match': etag },
                 params: { includeDrafts: this.options.includeDrafts },
-            });
+            };
+            const response = filteredKeys && filteredKeys.length > 0
+                ? await axios.post(url, { keyNames: filteredKeys }, requestConfig)
+                : await axios.get(url, requestConfig);
             if (response.status === 200) {
+                if (filteredKeys && filteredKeys.length > 0 && (response.data == null || Object.keys(response.data).length === 0)) {
+                    throw new Error(`Keys not found for language '${language}' in namespace '${namespace}'`);
+                }
                 data = { ...data, ...response.data };
                 if (this.options.cache) {
                     await this.options.cache.write(this.buildEtagKey(namespace, language), response.headers['etag']);
@@ -220,10 +235,24 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
     }
 
     private buildKey(namespace: string, language: string) {
-        return `calinga_translations_${namespace}_${language}`;
+        return `calinga_translations_${namespace}_${language}${this.keysSuffix()}`;
     }
 
     private buildEtagKey(namespace: string, language: string) {
-        return `calinga_etag_${namespace}_${language}`;
+        return `calinga_etag_${namespace}_${language}${this.keysSuffix()}`;
+    }
+
+    private keysSuffix(): string {
+        const keys = this.options.keys;
+        if (!keys || keys.length === 0) {
+            return '';
+        }
+        const sorted = [...keys].sort().join('|');
+        let hash = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            hash = ((hash << 5) - hash) + sorted.charCodeAt(i);
+            hash |= 0;
+        }
+        return `_${(hash >>> 0).toString(36)}`;
     }
 }
