@@ -1,6 +1,7 @@
 import i18next, { ResourceKey } from 'i18next';
 import { CalingaBackend, CalingaBackendOptions } from './';
 import axios from 'axios';
+import { name as packageName, version as packageVersion } from '../package.json';
 
 const keyName = 'origin';
 const language = 'en';
@@ -121,6 +122,37 @@ describe('read', () => {
                 });
             });
         });
+    });
+});
+
+describe('Client-Version header', () => {
+    it('is sent on translation requests', (done) => {
+        setupServiceAvailable();
+        const backend = new CalingaBackend(i18next.services, options, {});
+
+        backend.read(language, namespace, () => {
+            const translationCall = axiosMock.get.mock.calls.find(
+                ([url]) => typeof url === 'string' && url.includes('/languages/' + language),
+            );
+            expect(translationCall).toBeDefined();
+            const [, config] = translationCall!;
+            expect(config?.headers?.['Client-Version']).toBe(`${packageName}/${packageVersion}`);
+            done();
+        });
+    });
+
+    it('is sent on language list requests', (done) => {
+        setupServiceAvailable();
+        CalingaBackend.onLanguagesChanged = () => {
+            const languagesCall = axiosMock.get.mock.calls.find(
+                ([url]) => typeof url === 'string' && url.endsWith('/languages'),
+            );
+            expect(languagesCall).toBeDefined();
+            const [, config] = languagesCall!;
+            expect(config?.headers?.['Client-Version']).toBe(`${packageName}/${packageVersion}`);
+            done();
+        };
+        new CalingaBackend(i18next.services, options, {});
     });
 });
 

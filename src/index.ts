@@ -1,5 +1,8 @@
 import { BackendModule, Services, ReadCallback, Resource, InitOptions } from 'i18next';
 import axios from 'axios';
+import { name as packageName, version as packageVersion } from '../package.json';
+
+const clientVersionHeader = { 'Client-Version': `${packageName}/${packageVersion}` };
 
 export interface Cache {
     /**
@@ -157,7 +160,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
         try {
             const response = await axios.get(url, {
                 validateStatus: (status) => status === 200 || status === 304,
-                headers: { 'If-None-Match': etag },
+                headers: { 'If-None-Match': etag, ...clientVersionHeader },
                 params: { includeDrafts: this.options.includeDrafts },
             });
             if (response.status === 200) {
@@ -194,7 +197,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             {}
         );
         try {
-            axios.get(url).then((response) => {
+            axios.get(url, { headers: { ...clientVersionHeader } }).then((response) => {
                 if (response.status === 200) {
                     const languages = response.data.map((l) => l.name);
                     if (this.options.devMode) {
