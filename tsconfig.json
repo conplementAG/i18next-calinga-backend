@@ -5,12 +5,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "./dist",
-    "target": "es5",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
     "rootDir": "./src",
     "target": "ES2020",
-    "skipLibCheck": true,
+    "strict": true,
     "types": ["jest", "node"]
   },
   "include": [
