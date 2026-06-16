@@ -7,7 +7,6 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "rootDir": "./src",
     "target": "ES2020",
     "strict": true,
     "types": ["jest", "node"]
