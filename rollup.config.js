@@ -1,4 +1,5 @@
 import typescript from 'rollup-plugin-typescript2'
+import json from '@rollup/plugin-json'
 import pkg from './package.json'
 
 export default {
@@ -18,6 +19,7 @@ export default {
     ...Object.keys(pkg.peerDependencies || {}),
   ],
   plugins: [
+    json(),
     typescript({
       typescript: require('typescript'),
       tsconfigOverride: {

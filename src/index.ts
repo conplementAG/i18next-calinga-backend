@@ -1,5 +1,8 @@
 import { BackendModule, Services, ReadCallback, Resource, InitOptions } from 'i18next';
 import axios from 'axios';
+import { name as packageName, version as packageVersion } from '../package.json';
+
+const clientVersionHeader = { 'Client-Version': `${packageName}/${packageVersion}` };
 
 export interface Cache {
     /**
@@ -164,7 +167,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             const filteredKeys = this.options.keys;
             const requestConfig = {
                 validateStatus: (status: number) => status === 200 || status === 304,
-                headers: { 'If-None-Match': etag },
+                headers: { 'If-None-Match': etag, ...clientVersionHeader },
                 params: { includeDrafts: this.options.includeDrafts },
             };
             const response = filteredKeys && filteredKeys.length > 0
@@ -186,9 +189,9 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             if (data) {
                 callback(null, data);
             } else {
-                backendConnector?.loaded(`${language}|${namespace}`, error, null);
-                callback(error, null);
+                backendConnector?.loaded(`${language}|${namespace}`, error as Error, null);
                 this.services.logger.error('load translations failed', error);
+                callback(error as Error, null);
             }
         }
     }
@@ -211,7 +214,7 @@ export class CalingaBackend implements BackendModule<CalingaBackendOptions> {
             {}
         );
         try {
-            axios.get(url).then((response) => {
+            axios.get(url, { headers: { ...clientVersionHeader } }).then((response) => {
                 if (response.status === 200) {
                     const languages = response.data.map((l: { name: string }) => l.name);
                     if (this.options.devMode) {
