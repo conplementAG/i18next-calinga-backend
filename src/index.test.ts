@@ -82,7 +82,7 @@ describe('read', () => {
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
-                expect((data as ResourceKey)[keyName]).toBe(fromServiceTranslation);
+                expect((data as any)[keyName]).toBe(fromServiceTranslation);
                 done();
             });
         });
@@ -126,7 +126,7 @@ describe('read', () => {
 
             backend.read(language, namespace, (error, data) => {
                 expect(data).toBeDefined();
-                expect((data as any)[keyName]).toBe(fromCacheTranslation);
+                expect((data as any)[keyName]).toBe(fromServiceTranslation);
                 done();
             });
         });
@@ -153,7 +153,7 @@ describe('read', () => {
                     const getCall = axiosMock.get.mock.calls.find(
                         ([url]) => !url.endsWith('/languages')
                     );
-                    expect(getCall![1]!.headers['If-None-Match']).toBe('etag-abc123');
+                    expect(getCall![1]!.headers!['If-None-Match']).toBe('etag-abc123');
                     done();
                 });
             });
@@ -181,7 +181,7 @@ describe('read', () => {
             backend.read(language, namespace, (error, data) => {
                 expect(error).toBeNull();
                 expect(data).toBeDefined();
-                expect((data as ResourceKey)[keyName]).toBe(fromCacheTranslation);
+                expect((data as any)[keyName]).toBe(fromCacheTranslation);
                 done();
             });
         });
