@@ -3,7 +3,7 @@
     "declaration": true,
     "declarationDir": "./dist",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "esModuleInterop": true,
     "resolveJsonModule": true,
